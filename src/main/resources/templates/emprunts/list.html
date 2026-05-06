@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head><title>Emprunts</title></head>
+<body>
+<div layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-arrow-left-right me-2"></i>Emprunts</h2>
+        <a th:href="@{/emprunts/nouveau}" class="btn btn-warning">
+            <i class="bi bi-plus-circle me-1"></i>Nouvel emprunt
+        </a>
+    </div>
+
+    <!-- Filter by status -->
+    <form th:action="@{/emprunts}" method="get" class="mb-3">
+        <div class="d-flex gap-2 align-items-center flex-wrap">
+            <span class="fw-semibold">Filtrer :</span>
+            <a th:href="@{/emprunts}" class="btn btn-sm"
+               th:classappend="${statutFiltre == null} ? 'btn-dark' : 'btn-outline-dark'">Tous</a>
+            <a th:each="s : ${statuts}"
+               th:href="@{/emprunts(statut=${s.name()})}"
+               class="btn btn-sm"
+               th:classappend="${s == statutFiltre} ? (${s.name() == 'EN_COURS'} ? 'btn-warning' : (${s.name() == 'RENDU'} ? 'btn-success' : 'btn-danger')) : (${s.name() == 'EN_COURS'} ? 'btn-outline-warning' : (${s.name() == 'RENDU'} ? 'btn-outline-success' : 'btn-outline-danger'))"
+               th:text="${s.name().replace('_', ' ')}">
+            </a>
+        </div>
+    </form>
+
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Livre</th>
+                        <th>Membre</th>
+                        <th>Date emprunt</th>
+                        <th>Retour prévu</th>
+                        <th>Retour effectif</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${empruntsPage.isEmpty()}">
+                        <td colspan="8" class="text-center text-muted py-4">Aucun emprunt trouvé.</td>
+                    </tr>
+                    <tr th:each="emprunt : ${empruntsPage.content}">
+                        <td th:text="${emprunt.id}"></td>
+                        <td th:text="${emprunt.livre.titre}"></td>
+                        <td th:text="${emprunt.membre.prenom + ' ' + emprunt.membre.nom}"></td>
+                        <td th:text="${#temporals.format(emprunt.dateEmprunt, 'dd/MM/yyyy')}"></td>
+                        <td th:text="${#temporals.format(emprunt.dateRetourPrevue, 'dd/MM/yyyy')}"></td>
+                        <td th:text="${emprunt.dateRetourEffective != null} ? ${#temporals.format(emprunt.dateRetourEffective, 'dd/MM/yyyy')} : '-'"></td>
+                        <td>
+                            <span th:switch="${emprunt.statut.name()}">
+                                <span th:case="'EN_COURS'" class="badge bg-warning text-dark">En cours</span>
+                                <span th:case="'RENDU'" class="badge bg-success">Rendu</span>
+                                <span th:case="'EN_RETARD'" class="badge bg-danger">En retard</span>
+                            </span>
+                        </td>
+                        <td>
+                            <form th:if="${emprunt.statut.name() != 'RENDU'}"
+                                  th:action="@{/emprunts/{id}/retour(id=${emprunt.id})}" method="post" class="d-inline"
+                                  onsubmit="return confirm('Enregistrer le retour ?')">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                <button type="submit" class="btn btn-sm btn-outline-success">
+                                    <i class="bi bi-check-circle"></i> Retour
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <nav th:if="${empruntsPage.totalPages > 1}" class="mt-3">
+        <ul class="pagination justify-content-center">
+            <li class="page-item" th:classappend="${empruntsPage.first} ? 'disabled'">
+                <a class="page-link" th:href="@{/emprunts(page=${empruntsPage.number - 1}, statut=${statutFiltre})}">
+                    <i class="bi bi-chevron-left"></i>
+                </a>
+            </li>
+            <li class="page-item" th:each="i : ${#numbers.sequence(0, empruntsPage.totalPages - 1)}"
+                th:classappend="${i == empruntsPage.number} ? 'active'">
+                <a class="page-link" th:href="@{/emprunts(page=${i}, statut=${statutFiltre})}" th:text="${i + 1}"></a>
+            </li>
+            <li class="page-item" th:classappend="${empruntsPage.last} ? 'disabled'">
+                <a class="page-link" th:href="@{/emprunts(page=${empruntsPage.number + 1}, statut=${statutFiltre})}">
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
+</body>
+</html>

@@ -1,0 +1,33 @@
+INSERT IGNORE INTO livres (titre, auteur, isbn, categorie, quantite_total, quantite_disponible) VALUES
+('Clean Code', 'Robert C. Martin', '978-0132350884', 'Informatique', 3, 3),
+('Le Petit Prince', 'Antoine de Saint-Exupéry', '978-2070612758', 'Littérature', 5, 5),
+('Dune', 'Frank Herbert', '978-2221252055', 'Science-Fiction', 4, 4),
+('Design Patterns', 'Gang of Four', '978-0201633610', 'Informatique', 2, 2),
+('L''Étranger', 'Albert Camus', '978-2070360024', 'Littérature', 4, 4),
+('Spring Boot in Action', 'Craig Walls', '978-1617292545', 'Informatique', 3, 3),
+('1984', 'George Orwell', '978-2070368228', 'Dystopie', 5, 5),
+('Les Misérables', 'Victor Hugo', '978-2253096344', 'Littérature', 3, 3),
+('The Pragmatic Programmer', 'Hunt & Thomas', '978-0135957059', 'Informatique', 2, 2),
+('Sapiens', 'Yuval Noah Harari', '978-2226257017', 'Histoire', 4, 4),
+('Fondation', 'Isaac Asimov', '978-2070360536', 'Science-Fiction', 3, 3),
+('Refactoring', 'Martin Fowler', '978-0134757599', 'Informatique', 2, 2),
+('Guerre et Paix', 'Léon Tolstoï', '978-2253096375', 'Littérature', 2, 2),
+('Microservices Patterns', 'Chris Richardson', '978-1617294549', 'Informatique', 2, 2),
+('L''Art de la Guerre', 'Sun Tzu', '978-2080700049', 'Philosophie', 5, 5),
+('Thinking, Fast and Slow', 'Daniel Kahneman', '978-2081275850', 'Psychologie', 3, 3),
+('Harry Potter T1', 'J.K. Rowling', '978-2070541270', 'Fantasy', 5, 5),
+('Le Seigneur des Anneaux', 'J.R.R. Tolkien', '978-2267024586', 'Fantasy', 3, 3),
+('Docker Deep Dive', 'Nigel Poulton', '978-1521822807', 'Informatique', 4, 4),
+('Kubernetes in Action', 'Marko Luksa', '978-1617293726', 'Informatique', 2, 2);
+
+INSERT IGNORE INTO membres (nom, prenom, email, date_inscription, actif) VALUES
+('Ben Ali', 'Mohamed', 'mohamed.benali@fst.utm.tn', '2024-09-01', true),
+('Trabelsi', 'Sarra', 'sarra.trabelsi@fst.utm.tn', '2024-09-05', true),
+('Chaabane', 'Amine', 'amine.chaabane@fst.utm.tn', '2024-09-10', true),
+('Mansouri', 'Fatma', 'fatma.mansouri@fst.utm.tn', '2024-09-12', true),
+('Dridi', 'Youssef', 'youssef.dridi@fst.utm.tn', '2024-09-15', true),
+('Bouaziz', 'Nour', 'nour.bouaziz@fst.utm.tn', '2024-09-20', true),
+('Hamdi', 'Rami', 'rami.hamdi@fst.utm.tn', '2024-10-01', true),
+('Jebali', 'Inès', 'ines.jebali@fst.utm.tn', '2024-10-05', true),
+('Saidi', 'Khalil', 'khalil.saidi@fst.utm.tn', '2024-10-10', true),
+('Mekni', 'Amira', 'amira.mekni@fst.utm.tn', '2024-10-15', true);

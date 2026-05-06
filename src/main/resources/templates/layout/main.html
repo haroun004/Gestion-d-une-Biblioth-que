@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title layout:title-pattern="$CONTENT_TITLE - Bibliothèque FST">Bibliothèque FST</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}"/>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap-icons/font/bootstrap-icons.min.css}"/>
+    <style>
+        body { background-color: #f8f9fa; }
+        .sidebar { min-height: 100vh; background: #212529; }
+        .sidebar .nav-link { color: #adb5bd; }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active { color: #fff; background: #343a40; border-radius: 6px; }
+        .sidebar .brand { font-size: 1.2rem; font-weight: 700; }
+        .stat-card { border-left: 4px solid; }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-2 d-none d-md-block sidebar py-3 px-2">
+            <div class="text-white brand mb-4 px-2">
+                <i class="bi bi-book-half me-2"></i>Bibliothèque
+            </div>
+            <ul class="nav flex-column gap-1">
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/dashboard}" th:classappend="${currentUri == '/dashboard' or currentUri == '/'} ? 'active'">
+                        <i class="bi bi-speedometer2 me-2"></i>Tableau de bord
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/livres}" th:classappend="${#strings.startsWith(currentUri, '/livres')} ? 'active'">
+                        <i class="bi bi-journals me-2"></i>Livres
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/membres}" th:classappend="${#strings.startsWith(currentUri, '/membres')} ? 'active'">
+                        <i class="bi bi-people me-2"></i>Membres
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/emprunts}" th:classappend="${#strings.startsWith(currentUri, '/emprunts')} ? 'active'">
+                        <i class="bi bi-arrow-left-right me-2"></i>Emprunts
+                    </a>
+                </li>
+            </ul>
+            <hr class="border-secondary"/>
+            <div class="px-2 text-secondary small">
+                Connecté : <span sec:authentication="name" class="text-white"></span>
+            </div>
+            <form th:action="@{/logout}" method="post" class="mt-2 px-2">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <button type="submit" class="btn btn-sm btn-outline-danger w-100">
+                    <i class="bi bi-box-arrow-right me-1"></i>Déconnexion
+                </button>
+            </form>
+        </nav>
+
+        <!-- Main content -->
+        <main class="col-md-10 ms-sm-auto px-4 py-4">
+            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle me-2"></i><span th:text="${successMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle me-2"></i><span th:text="${errorMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <div layout:fragment="content"></div>
+        </main>
+    </div>
+</div>
+<script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

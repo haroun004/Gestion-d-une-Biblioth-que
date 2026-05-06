@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head><title>Livres</title></head>
+<body>
+<div layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-journals me-2"></i>Livres</h2>
+        <a th:href="@{/livres/nouveau}" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i>Ajouter
+        </a>
+    </div>
+
+    <!-- Search -->
+    <form th:action="@{/livres}" method="get" class="mb-3">
+        <div class="input-group">
+            <input type="text" name="search" class="form-control"
+                   placeholder="Rechercher par titre, auteur ou catégorie..."
+                   th:value="${search}"/>
+            <button class="btn btn-outline-secondary" type="submit">
+                <i class="bi bi-search"></i>
+            </button>
+            <a th:href="@{/livres}" class="btn btn-outline-danger" th:if="${search != null and !search.isEmpty()}">
+                <i class="bi bi-x"></i>
+            </a>
+        </div>
+    </form>
+
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Titre</th>
+                        <th>Auteur</th>
+                        <th>ISBN</th>
+                        <th>Catégorie</th>
+                        <th>Total</th>
+                        <th>Disponible</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${livresPage.isEmpty()}">
+                        <td colspan="8" class="text-center text-muted py-4">Aucun livre trouvé.</td>
+                    </tr>
+                    <tr th:each="livre : ${livresPage.content}">
+                        <td th:text="${livre.id}"></td>
+                        <td th:text="${livre.titre}"></td>
+                        <td th:text="${livre.auteur}"></td>
+                        <td><code th:text="${livre.isbn}"></code></td>
+                        <td><span class="badge bg-secondary" th:text="${livre.categorie}"></span></td>
+                        <td th:text="${livre.quantiteTotal}"></td>
+                        <td>
+                            <span th:classappend="${livre.quantiteDisponible == 0} ? 'badge bg-danger' : 'badge bg-success'"
+                                  th:text="${livre.quantiteDisponible}"></span>
+                        </td>
+                        <td>
+                            <a th:href="@{/livres/{id}/modifier(id=${livre.id})}" class="btn btn-sm btn-outline-primary me-1">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <form th:action="@{/livres/{id}/supprimer(id=${livre.id})}" method="post" class="d-inline"
+                                  onsubmit="return confirm('Supprimer ce livre ?')">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <nav th:if="${livresPage.totalPages > 1}" class="mt-3">
+        <ul class="pagination justify-content-center">
+            <li class="page-item" th:classappend="${livresPage.first} ? 'disabled'">
+                <a class="page-link" th:href="@{/livres(page=${livresPage.number - 1}, search=${search})}">
+                    <i class="bi bi-chevron-left"></i>
+                </a>
+            </li>
+            <li class="page-item" th:each="i : ${#numbers.sequence(0, livresPage.totalPages - 1)}"
+                th:classappend="${i == livresPage.number} ? 'active'">
+                <a class="page-link" th:href="@{/livres(page=${i}, search=${search})}" th:text="${i + 1}"></a>
+            </li>
+            <li class="page-item" th:classappend="${livresPage.last} ? 'disabled'">
+                <a class="page-link" th:href="@{/livres(page=${livresPage.number + 1}, search=${search})}">
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
+</body>
+</html>

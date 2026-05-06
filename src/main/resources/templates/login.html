@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Connexion — Bibliothèque FST</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}"/>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap-icons/font/bootstrap-icons.min.css}"/>
+</head>
+<body class="bg-light">
+<div class="container">
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-4">
+            <div class="card shadow">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <i class="bi bi-book-half" style="font-size:3rem;color:#212529"></i>
+                        <h3 class="mt-2">Bibliothèque FST</h3>
+                        <p class="text-muted">Veuillez vous connecter</p>
+                    </div>
+
+                    <div th:if="${param.error}" class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle me-1"></i>
+                        Identifiants incorrects.
+                    </div>
+                    <div th:if="${param.logout}" class="alert alert-success">
+                        <i class="bi bi-check-circle me-1"></i>
+                        Déconnexion réussie.
+                    </div>
+
+                    <form th:action="@{/login}" method="post">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <div class="mb-3">
+                            <label class="form-label">Identifiant</label>
+                            <input type="text" name="username" class="form-control" autofocus/>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Mot de passe</label>
+                            <input type="password" name="password" class="form-control"/>
+                        </div>
+                        <button type="submit" class="btn btn-dark w-100">
+                            <i class="bi bi-box-arrow-in-right me-1"></i>Se connecter
+                        </button>
+                    </form>
+
+                    <div class="mt-3 text-center text-muted small">
+                        <strong>Admin :</strong> admin / admin123 &nbsp;|&nbsp;
+                        <strong>User :</strong> user / user123
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
