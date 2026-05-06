@@ -44,3 +44,6 @@ logs/
 .env
 application-local.properties
 application-secret.properties
+
+### JDK ###
+oracleJdk-26/
