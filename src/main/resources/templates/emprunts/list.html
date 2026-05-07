@@ -48,8 +48,8 @@
                     </tr>
                     <tr th:each="emprunt : ${empruntsPage.content}">
                         <td th:text="${emprunt.id}"></td>
-                        <td th:text="${emprunt.livre.titre}"></td>
-                        <td th:text="${emprunt.membre.prenom + ' ' + emprunt.membre.nom}"></td>
+                        <td th:text="${emprunt.livretitre}"></td>
+                        <td th:text="${emprunt.membreNomComplet}"></td>
                         <td th:text="${#temporals.format(emprunt.dateEmprunt, 'dd/MM/yyyy')}"></td>
                         <td th:text="${#temporals.format(emprunt.dateRetourPrevue, 'dd/MM/yyyy')}"></td>
                         <td th:text="${emprunt.dateRetourEffective != null} ? ${#temporals.format(emprunt.dateRetourEffective, 'dd/MM/yyyy')} : '-'"></td>
@@ -61,7 +61,7 @@
                             </span>
                         </td>
                         <td>
-                            <form th:if="${emprunt.statut.name() != 'RENDU'}"
+                            <form th:if="${!emprunt.rendu}"
                                   th:action="@{/emprunts/{id}/retour(id=${emprunt.id})}" method="post" class="d-inline"
                                   onsubmit="return confirm('Enregistrer le retour ?')">
                                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>

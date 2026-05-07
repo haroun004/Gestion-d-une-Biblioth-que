@@ -1,20 +1,28 @@
 package com.fst.bibliotheque.controller;
 
-import com.fst.bibliotheque.entity.Emprunt;
-import com.fst.bibliotheque.entity.StatutEmprunt;
-import com.fst.bibliotheque.service.EmpruntService;
-import com.fst.bibliotheque.service.LivreService;
-import com.fst.bibliotheque.service.MembreService;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import com.fst.bibliotheque.dto.EmpruntFormDTO;
+import com.fst.bibliotheque.dto.EmpruntViewDTO;
+import com.fst.bibliotheque.entity.StatutEmprunt;
+import com.fst.bibliotheque.service.EmpruntService;
+import com.fst.bibliotheque.service.LivreService;
+import com.fst.bibliotheque.service.MembreService;
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @Controller
 @RequestMapping("/emprunts")
@@ -30,7 +38,7 @@ public class EmpruntController {
                        @RequestParam(required = false) StatutEmprunt statut,
                        @RequestParam(defaultValue = "0") int page,
                        @RequestParam(defaultValue = "10") int size) {
-        Page<Emprunt> empruntsPage = empruntService.findAll(statut,
+        Page<EmpruntViewDTO> empruntsPage = empruntService.findAll(statut,
                 PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "dateEmprunt")));
         model.addAttribute("empruntsPage", empruntsPage);
         model.addAttribute("statuts", StatutEmprunt.values());
@@ -40,14 +48,14 @@ public class EmpruntController {
 
     @GetMapping("/nouveau")
     public String createForm(Model model) {
-        model.addAttribute("emprunt", new Emprunt());
+        model.addAttribute("empruntForm", new EmpruntFormDTO());
         model.addAttribute("livres", livreService.findAll(null, PageRequest.of(0, 1000)).getContent());
         model.addAttribute("membres", membreService.findAllActifs());
         return "emprunts/form";
     }
 
     @PostMapping("/sauvegarder")
-    public String save(@Valid @ModelAttribute Emprunt emprunt,
+    public String save(@Valid @ModelAttribute("empruntForm") EmpruntFormDTO empruntFormDTO,
                        BindingResult result,
                        Model model,
                        RedirectAttributes redirectAttributes) {
@@ -57,7 +65,7 @@ public class EmpruntController {
             return "emprunts/form";
         }
         try {
-            empruntService.creerEmprunt(emprunt);
+            empruntService.creerEmprunt(empruntFormDTO);
             redirectAttributes.addFlashAttribute("successMessage", "Emprunt créé avec succès.");
         } catch (IllegalStateException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
@@ -72,3 +80,4 @@ public class EmpruntController {
         return "redirect:/emprunts";
     }
 }
+

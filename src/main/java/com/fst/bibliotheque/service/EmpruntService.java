@@ -9,11 +9,16 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.fst.bibliotheque.dto.DtoMapper;
+import com.fst.bibliotheque.dto.EmpruntFormDTO;
+import com.fst.bibliotheque.dto.EmpruntViewDTO;
 import com.fst.bibliotheque.entity.Emprunt;
 import com.fst.bibliotheque.entity.Livre;
+import com.fst.bibliotheque.entity.Membre;
 import com.fst.bibliotheque.entity.StatutEmprunt;
 import com.fst.bibliotheque.repository.EmpruntRepository;
 import com.fst.bibliotheque.repository.LivreRepository;
+import com.fst.bibliotheque.repository.MembreRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -24,33 +29,41 @@ public class EmpruntService {
 
     private final EmpruntRepository empruntRepository;
     private final LivreRepository livreRepository;
+    private final MembreRepository membreRepository;
 
-    public Page<Emprunt> findAll(StatutEmprunt statut, Pageable pageable) {
-        if (statut == null) {
-            return empruntRepository.findAll(pageable);
-        }
-        return empruntRepository.findByStatut(statut, pageable);
+    public Page<EmpruntViewDTO> findAll(StatutEmprunt statut, Pageable pageable) {
+        Page<Emprunt> page = (statut == null)
+                ? empruntRepository.findAll(pageable)
+                : empruntRepository.findByStatut(statut, pageable);
+        return page.map(DtoMapper::toViewDTO);
     }
 
-    public Emprunt findById(Long id) {
-        return empruntRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Emprunt introuvable : " + id));
-    }
+    public EmpruntViewDTO creerEmprunt(EmpruntFormDTO dto) {
+        Livre livre = livreRepository.findById(dto.getLivreId())
+                .orElseThrow(() -> new IllegalArgumentException("Livre introuvable : " + dto.getLivreId()));
+        Membre membre = membreRepository.findById(dto.getMembreId())
+                .orElseThrow(() -> new IllegalArgumentException("Membre introuvable : " + dto.getMembreId()));
 
-    public Emprunt creerEmprunt(Emprunt emprunt) {
-        Livre livre = emprunt.getLivre();
         if (livre.getQuantiteDisponible() <= 0) {
             throw new IllegalStateException("Ce livre n'est plus disponible.");
         }
+
         livre.setQuantiteDisponible(livre.getQuantiteDisponible() - 1);
         livreRepository.save(livre);
-        emprunt.setStatut(StatutEmprunt.EN_COURS);
+
+        Emprunt emprunt = new Emprunt();
+        emprunt.setLivre(livre);
+        emprunt.setMembre(membre);
         emprunt.setDateEmprunt(LocalDate.now());
-        return empruntRepository.save(emprunt);
+        emprunt.setDateRetourPrevue(dto.getDateRetourPrevue());
+        emprunt.setStatut(StatutEmprunt.EN_COURS);
+
+        return DtoMapper.toViewDTO(empruntRepository.save(emprunt));
     }
 
-    public Emprunt enregistrerRetour(Long id) {
-        Emprunt emprunt = findById(id);
+    public EmpruntViewDTO enregistrerRetour(Long id) {
+        Emprunt emprunt = empruntRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Emprunt introuvable : " + id));
         if (emprunt.getStatut() == StatutEmprunt.RENDU) {
             throw new IllegalStateException("Cet emprunt est déjà rendu.");
         }
@@ -59,7 +72,7 @@ public class EmpruntService {
         Livre livre = emprunt.getLivre();
         livre.setQuantiteDisponible(livre.getQuantiteDisponible() + 1);
         livreRepository.save(livre);
-        return empruntRepository.save(emprunt);
+        return DtoMapper.toViewDTO(empruntRepository.save(emprunt));
     }
 
     @Scheduled(cron = "0 0 1 * * *")
@@ -78,3 +91,4 @@ public class EmpruntService {
         return empruntRepository.countEnRetard(LocalDate.now());
     }
 }
+
