@@ -52,23 +52,3 @@ spring.log
 application-local.properties
 application-local.yml
 application-secret.properties
-application-secret.yml
-application-prod.properties
-application-prod.yml
-
-# ── Docker local overrides ───────────────────────────────────────
-docker-compose.override.yml
-
-# ── Docker build context (may contain credentials) ───────────────
-docker/maven-settings.xml
-
-# ── MySQL Docker volume data ─────────────────────────────────────
-mysql_data/
-
-# ── Test & coverage reports ──────────────────────────────────────
-/target/surefire-reports/
-/target/site/
-*.exec
-
-# ── Compiled class files ────────────────────────────────────────
-*.class
