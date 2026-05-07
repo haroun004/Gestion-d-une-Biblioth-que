@@ -1,17 +1,24 @@
 package com.fst.bibliotheque.controller;
 
-import com.fst.bibliotheque.entity.Membre;
-import com.fst.bibliotheque.service.MembreService;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import com.fst.bibliotheque.dto.MembreDTO;
+import com.fst.bibliotheque.service.MembreService;
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @Controller
 @RequestMapping("/membres")
@@ -25,7 +32,7 @@ public class MembreController {
                        @RequestParam(defaultValue = "") String search,
                        @RequestParam(defaultValue = "0") int page,
                        @RequestParam(defaultValue = "10") int size) {
-        Page<Membre> membresPage = membreService.findAll(search,
+        Page<MembreDTO> membresPage = membreService.findAll(search,
                 PageRequest.of(page, size, Sort.by("nom")));
         model.addAttribute("membresPage", membresPage);
         model.addAttribute("search", search);
@@ -34,7 +41,7 @@ public class MembreController {
 
     @GetMapping("/nouveau")
     public String createForm(Model model) {
-        model.addAttribute("membre", new Membre());
+        model.addAttribute("membre", new MembreDTO());
         model.addAttribute("action", "Ajouter");
         return "membres/form";
     }
@@ -47,15 +54,15 @@ public class MembreController {
     }
 
     @PostMapping("/sauvegarder")
-    public String save(@Valid @ModelAttribute Membre membre,
+    public String save(@Valid @ModelAttribute("membre") MembreDTO membreDTO,
                        BindingResult result,
                        Model model,
                        RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
-            model.addAttribute("action", membre.getId() == null ? "Ajouter" : "Modifier");
+            model.addAttribute("action", membreDTO.getId() == null ? "Ajouter" : "Modifier");
             return "membres/form";
         }
-        membreService.save(membre);
+        membreService.save(membreDTO);
         redirectAttributes.addFlashAttribute("successMessage", "Membre sauvegardé avec succès.");
         return "redirect:/membres";
     }
@@ -67,3 +74,4 @@ public class MembreController {
         return "redirect:/membres";
     }
 }
+
