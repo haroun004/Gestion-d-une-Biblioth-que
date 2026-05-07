@@ -43,6 +43,9 @@ public class EmpruntController {
         model.addAttribute("empruntsPage", empruntsPage);
         model.addAttribute("statuts", StatutEmprunt.values());
         model.addAttribute("statutFiltre", statut);
+        model.addAttribute("empruntForm", new EmpruntFormDTO());
+        model.addAttribute("livres", livreService.findAll(null, PageRequest.of(0, 1000)).getContent());
+        model.addAttribute("membres", membreService.findAllActifs());
         return "emprunts/list";
     }
 

@@ -36,6 +36,7 @@ public class LivreController {
                 PageRequest.of(page, size, Sort.by("titre")));
         model.addAttribute("livresPage", livresPage);
         model.addAttribute("search", search);
+        model.addAttribute("nouveauLivre", new LivreDTO());
         return "livres/list";
     }
 

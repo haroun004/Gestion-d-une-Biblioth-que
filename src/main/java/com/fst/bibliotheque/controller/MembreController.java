@@ -36,6 +36,7 @@ public class MembreController {
                 PageRequest.of(page, size, Sort.by("nom")));
         model.addAttribute("membresPage", membresPage);
         model.addAttribute("search", search);
+        model.addAttribute("nouveauMembre", new MembreDTO());
         return "membres/list";
     }
 
