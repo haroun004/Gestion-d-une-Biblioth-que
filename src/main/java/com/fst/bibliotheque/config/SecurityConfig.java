@@ -10,6 +10,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 
 @Configuration
 @EnableWebSecurity
@@ -35,9 +36,14 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        // Use non-deferred CSRF so Thymeleaf ${_csrf.token} resolves eagerly
+        var requestHandler = new CsrfTokenRequestAttributeHandler();
+        requestHandler.setCsrfRequestAttributeName(null); // forces eager load
+
         http
+            .csrf(csrf -> csrf.csrfTokenRequestHandler(requestHandler))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
+                .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**", "/animations/**").permitAll()
                 .requestMatchers("/livres/*/supprimer", "/membres/*/supprimer").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
@@ -48,8 +54,12 @@ public class SecurityConfig {
             )
             .logout(logout -> logout
                 .logoutSuccessUrl("/login?logout")
+                .invalidateHttpSession(true)
+                .clearAuthentication(true)
+                .deleteCookies("JSESSIONID")
                 .permitAll()
             );
         return http.build();
     }
 }
+

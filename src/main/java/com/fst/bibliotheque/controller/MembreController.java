@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.fst.bibliotheque.dto.MembreDTO;
+import com.fst.bibliotheque.service.EmpruntService;
 import com.fst.bibliotheque.service.MembreService;
 
 import jakarta.validation.Valid;
@@ -26,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 public class MembreController {
 
     private final MembreService membreService;
+    private final EmpruntService empruntService;
 
     @GetMapping
     public String list(Model model,
@@ -36,6 +38,7 @@ public class MembreController {
                 PageRequest.of(page, size, Sort.by("nom")));
         model.addAttribute("membresPage", membresPage);
         model.addAttribute("search", search);
+        model.addAttribute("nouveauMembre", new MembreDTO());
         return "membres/list";
     }
 
@@ -72,6 +75,13 @@ public class MembreController {
         membreService.deleteById(id);
         redirectAttributes.addFlashAttribute("successMessage", "Membre supprimé avec succès.");
         return "redirect:/membres";
+    }
+
+    @GetMapping("/{id}/historique")
+    public String historique(@PathVariable Long id, Model model) {
+        model.addAttribute("membre", membreService.findById(id));
+        model.addAttribute("historique", empruntService.findHistoriqueByMembre(id));
+        return "membres/historique";
     }
 }
 

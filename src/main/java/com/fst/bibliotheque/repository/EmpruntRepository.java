@@ -15,7 +15,11 @@ public interface EmpruntRepository extends JpaRepository<Emprunt, Long> {
 
     Page<Emprunt> findByStatut(StatutEmprunt statut, Pageable pageable);
 
+    List<Emprunt> findByStatut(StatutEmprunt statut);
+
     List<Emprunt> findByStatutAndDateRetourPrevueBefore(StatutEmprunt statut, LocalDate date);
+
+    List<Emprunt> findByMembreIdOrderByDateEmpruntDesc(Long membreId);
 
     long countByStatut(StatutEmprunt statut);
 

@@ -5,36 +5,40 @@
 <head><title>Membres</title></head>
 <body>
 <div layout:fragment="content">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="bi bi-people me-2"></i>Membres</h2>
-        <a th:href="@{/membres/nouveau}" class="btn btn-success">
-            <i class="bi bi-person-plus me-1"></i>Ajouter
-        </a>
+
+    <div class="page-header">
+        <h2><i class="bi bi-people"></i>Membres</h2>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addMembreModal">
+            <i class="bi bi-person-plus me-1"></i>Ajouter un membre
+        </button>
     </div>
 
     <!-- Search -->
     <form th:action="@{/membres}" method="get" class="mb-3">
-        <div class="input-group">
+        <div class="input-group search-bar" style="max-width:480px">
+            <span class="input-group-text" style="background:#fff;border-color:#cbd5e1;border-right:none">
+                <i class="bi bi-search" style="color:#94a3b8"></i>
+            </span>
             <input type="text" name="search" class="form-control"
-                   placeholder="Rechercher par nom, prénom ou email..."
+                   style="border-left:none;border-radius:0"
+                   placeholder="Nom, prénom ou email…"
                    th:value="${search}"/>
-            <button class="btn btn-outline-secondary" type="submit">
-                <i class="bi bi-search"></i>
-            </button>
-            <a th:href="@{/membres}" class="btn btn-outline-danger" th:if="${search != null and !search.isEmpty()}">
-                <i class="bi bi-x"></i>
+            <button class="btn" type="submit"
+                    style="background:#4f46e5;color:#fff;border-color:#4f46e5;border-radius:0 8px 8px 0">Rechercher</button>
+            <a th:href="@{/membres}" class="btn btn-outline-secondary ms-1"
+               style="border-radius:8px" th:if="${search != null and !search.isEmpty()}">
+                <i class="bi bi-x-lg"></i>
             </a>
         </div>
     </form>
 
-    <div class="card">
+    <div class="table-card">
         <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <thead class="table-dark">
+            <table class="table">
+                <thead>
                     <tr>
                         <th>#</th>
-                        <th>Nom</th>
-                        <th>Prénom</th>
+                        <th>Nom complet</th>
                         <th>Email</th>
                         <th>Inscription</th>
                         <th>Statut</th>
@@ -43,29 +47,52 @@
                 </thead>
                 <tbody>
                     <tr th:if="${membresPage.isEmpty()}">
-                        <td colspan="7" class="text-center text-muted py-4">Aucun membre trouvé.</td>
+                        <td colspan="6">
+                            <div class="empty-state">
+                                <i class="bi bi-people"></i>
+                                <div style="font-weight:600;margin-bottom:.25rem">Aucun membre trouvé</div>
+                                <div style="font-size:.8rem">Essayez un autre terme ou inscrivez un nouveau membre.</div>
+                            </div>
+                        </td>
                     </tr>
                     <tr th:each="membre : ${membresPage.content}">
-                        <td th:text="${membre.id}"></td>
-                        <td th:text="${membre.nom}"></td>
-                        <td th:text="${membre.prenom}"></td>
-                        <td th:text="${membre.email}"></td>
+                        <td style="color:#94a3b8;font-size:.8rem" th:text="${membre.id}"></td>
+                        <td>
+                            <div style="font-weight:500;color:#0f172a"
+                                 th:text="${membre.prenom + ' ' + membre.nom}"></div>
+                        </td>
+                        <td style="color:#64748b" th:text="${membre.email}"></td>
                         <td th:text="${#temporals.format(membre.dateInscription, 'dd/MM/yyyy')}"></td>
                         <td>
-                            <span th:if="${membre.actif}" class="badge bg-success">Actif</span>
-                            <span th:unless="${membre.actif}" class="badge bg-secondary">Inactif</span>
+                            <span th:if="${membre.actif}"
+                                  class="badge" style="background:#d1fae5;color:#065f46">Actif</span>
+                            <span th:unless="${membre.actif}"
+                                  class="badge" style="background:#f1f5f9;color:#64748b">Inactif</span>
                         </td>
                         <td>
-                            <a th:href="@{/membres/{id}/modifier(id=${membre.id})}" class="btn btn-sm btn-outline-primary me-1">
-                                <i class="bi bi-pencil"></i>
-                            </a>
-                            <form th:action="@{/membres/{id}/supprimer(id=${membre.id})}" method="post" class="d-inline"
-                                  onsubmit="return confirm('Supprimer ce membre ?')">
-                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                                <button type="submit" class="btn btn-sm btn-outline-danger">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </form>
+                            <div class="d-flex gap-1">
+                                <a th:href="@{/membres/{id}/historique(id=${membre.id})}"
+                                   class="btn btn-sm btn-icon"
+                                   style="border:1px solid #e2e8f0;background:#fff;color:#64748b"
+                                   title="Historique des emprunts">
+                                    <i class="bi bi-clock-history"></i>
+                                </a>
+                                <a th:href="@{/membres/{id}/modifier(id=${membre.id})}"
+                                   class="btn btn-sm btn-icon"
+                                   style="border:1px solid #e2e8f0;background:#fff;color:#4f46e5"
+                                   title="Modifier">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form th:action="@{/membres/{id}/supprimer(id=${membre.id})}" method="post" class="d-inline"
+                                      onsubmit="return confirm('Supprimer ce membre ?')">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                    <button type="submit" class="btn btn-sm btn-icon"
+                                            style="border:1px solid #e2e8f0;background:#fff;color:#dc2626"
+                                            title="Supprimer">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                 </tbody>
@@ -75,7 +102,7 @@
 
     <!-- Pagination -->
     <nav th:if="${membresPage.totalPages > 1}" class="mt-3">
-        <ul class="pagination justify-content-center">
+        <ul class="pagination justify-content-center flex-wrap">
             <li class="page-item" th:classappend="${membresPage.first} ? 'disabled'">
                 <a class="page-link" th:href="@{/membres(page=${membresPage.number - 1}, search=${search})}">
                     <i class="bi bi-chevron-left"></i>
@@ -92,6 +119,67 @@
             </li>
         </ul>
     </nav>
+
+    <!-- ── Modal : Ajouter un membre ─────────────────────────── -->
+    <div class="modal fade" id="addMembreModal" tabindex="-1" aria-labelledby="addMembreModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="max-width:480px">
+            <div class="modal-content" style="border-radius:16px;border:none;box-shadow:0 20px 60px rgba(0,0,0,.18)">
+
+                <div class="modal-header" style="border-bottom:1px solid #e2e8f0;padding:1.25rem 1.5rem">
+                    <div style="display:flex;align-items:center;gap:.65rem">
+                        <div class="stat-icon green" style="width:36px;height:36px;font-size:.95rem;flex-shrink:0">
+                            <i class="bi bi-person-plus"></i>
+                        </div>
+                        <h5 class="modal-title mb-0 fw-bold" id="addMembreModalLabel">Ajouter un membre</h5>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body p-4">
+                    <form th:action="@{/membres/sauvegarder}" th:object="${nouveauMembre}" method="post">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <label class="form-label">Prénom <span style="color:#dc2626">*</span></label>
+                                <input type="text" th:field="*{prenom}" class="form-control" placeholder="Prénom"
+                                       th:classappend="${#fields.hasErrors('prenom')} ? 'is-invalid'"/>
+                                <div class="invalid-feedback" th:errors="*{prenom}"></div>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Nom <span style="color:#dc2626">*</span></label>
+                                <input type="text" th:field="*{nom}" class="form-control" placeholder="Nom"
+                                       th:classappend="${#fields.hasErrors('nom')} ? 'is-invalid'"/>
+                                <div class="invalid-feedback" th:errors="*{nom}"></div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top:.8rem">
+                            <label class="form-label">Email <span style="color:#dc2626">*</span></label>
+                            <input type="email" th:field="*{email}" class="form-control" placeholder="exemple@domaine.com"
+                                   th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'"/>
+                            <div class="invalid-feedback" th:errors="*{email}"></div>
+                        </div>
+
+                        <div style="margin-top:.8rem">
+                            <label class="form-label d-flex align-items-center gap-2" for="actifModal">
+                                <input type="checkbox" th:field="*{actif}" class="form-check-input" id="actifModal"
+                                       style="width:18px;height:18px;border-radius:5px" checked/>
+                                Membre actif
+                            </label>
+                        </div>
+
+                        <div class="d-flex gap-2 justify-content-end" style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid #e2e8f0">
+                            <button type="button" class="btn"
+                                    style="background:#f1f5f9;border:1px solid #e2e8f0;color:#334155"
+                                    data-bs-dismiss="modal">Annuler</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-lg me-1"></i>Ajouter
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-</body>
-</html>
