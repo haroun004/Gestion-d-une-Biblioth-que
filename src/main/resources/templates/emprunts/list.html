@@ -8,9 +8,15 @@
 
     <div class="page-header">
         <h2><i class="bi bi-arrow-left-right"></i>Emprunts</h2>
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEmpruntModal">
-            <i class="bi bi-plus-lg me-1"></i>Nouvel emprunt
-        </button>
+        <div class="d-flex gap-2">
+            <a th:href="@{/emprunts/export/csv(statut=${statutFiltre})}" class="btn"
+               style="border:1px solid #e2e8f0;background:#fff;color:#334155;font-size:.85rem">
+                <i class="bi bi-download me-1"></i>Exporter CSV
+            </a>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEmpruntModal">
+                <i class="bi bi-plus-lg me-1"></i>Nouvel emprunt
+            </button>
+        </div>
     </div>
 
     <!-- Status filter pills -->

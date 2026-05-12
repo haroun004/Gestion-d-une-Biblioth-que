@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head><title>Historique des emprunts</title></head>
+<body>
+<div layout:fragment="content">
+
+    <div class="page-header">
+        <div class="d-flex align-items-center gap-3">
+            <a th:href="@{/membres}" class="btn-back" title="Retour aux membres">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            <h2 style="margin:0">
+                <i class="bi bi-clock-history"></i>
+                Historique —
+                <span th:text="${membre.prenom + ' ' + membre.nom}"
+                      style="color:#4f46e5"></span>
+            </h2>
+        </div>
+        <span style="font-size:.8rem;color:#64748b;background:#f1f5f9;padding:.4rem .9rem;border-radius:20px;border:1px solid #e2e8f0"
+              th:text="${membre.email}"></span>
+    </div>
+
+    <!-- Stats summary -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="stat-card p-3 d-flex align-items-center gap-3">
+                <div class="stat-icon blue"><i class="bi bi-arrow-left-right"></i></div>
+                <div>
+                    <div style="font-size:1.5rem;font-weight:700;color:#0f172a"
+                         th:text="${historique.size()}"></div>
+                    <div style="font-size:.75rem;color:#64748b;font-weight:500">Total emprunts</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card p-3 d-flex align-items-center gap-3">
+                <div class="stat-icon amber"><i class="bi bi-hourglass-split"></i></div>
+                <div>
+                    <div style="font-size:1.5rem;font-weight:700;color:#0f172a"
+                         th:text="${#lists.size(historique.?[statut.name() == 'EN_COURS'])}"></div>
+                    <div style="font-size:.75rem;color:#64748b;font-weight:500">En cours</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card p-3 d-flex align-items-center gap-3">
+                <div class="stat-icon green"><i class="bi bi-check-circle"></i></div>
+                <div>
+                    <div style="font-size:1.5rem;font-weight:700;color:#0f172a"
+                         th:text="${#lists.size(historique.?[statut.name() == 'RENDU'])}"></div>
+                    <div style="font-size:.75rem;color:#64748b;font-weight:500">Rendus</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card p-3 d-flex align-items-center gap-3">
+                <div class="stat-icon red"><i class="bi bi-exclamation-circle"></i></div>
+                <div>
+                    <div style="font-size:1.5rem;font-weight:700;color:#0f172a"
+                         th:text="${#lists.size(historique.?[statut.name() == 'EN_RETARD'])}"></div>
+                    <div style="font-size:.75rem;color:#64748b;font-weight:500">En retard</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loan history table -->
+    <div class="table-card">
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Livre</th>
+                        <th>Emprunté le</th>
+                        <th>Retour prévu</th>
+                        <th>Retour effectif</th>
+                        <th>Statut</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${historique.isEmpty()}">
+                        <td colspan="6">
+                            <div class="empty-state">
+                                <i class="bi bi-clock-history"></i>
+                                <div style="font-weight:600;margin-bottom:.25rem">Aucun emprunt enregistré</div>
+                                <div style="font-size:.8rem">Ce membre n'a pas encore effectué d'emprunt.</div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:each="emprunt : ${historique}">
+                        <td style="color:#94a3b8;font-size:.8rem" th:text="${emprunt.id}"></td>
+                        <td>
+                            <div style="font-weight:500;color:#0f172a" th:text="${emprunt.livretitre}"></div>
+                        </td>
+                        <td style="font-size:.8rem;color:#64748b"
+                            th:text="${#temporals.format(emprunt.dateEmprunt, 'dd/MM/yyyy')}"></td>
+                        <td style="font-size:.8rem"
+                            th:text="${#temporals.format(emprunt.dateRetourPrevue, 'dd/MM/yyyy')}"
+                            th:style="${emprunt.statut.name() == 'EN_RETARD'} ? 'color:#dc2626;font-weight:600' : 'color:#64748b'"></td>
+                        <td style="font-size:.8rem;color:#64748b"
+                            th:text="${emprunt.dateRetourEffective != null} ? ${#temporals.format(emprunt.dateRetourEffective, 'dd/MM/yyyy')} : '—'"></td>
+                        <td>
+                            <span th:switch="${emprunt.statut.name()}">
+                                <span th:case="'EN_COURS'" class="badge" style="background:#fef3c7;color:#92400e">En cours</span>
+                                <span th:case="'RENDU'"    class="badge" style="background:#d1fae5;color:#065f46">Rendu</span>
+                                <span th:case="'EN_RETARD'" class="badge" style="background:#fee2e2;color:#991b1b">
+                                    <i class="bi bi-exclamation-circle me-1"></i>En retard
+                                </span>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

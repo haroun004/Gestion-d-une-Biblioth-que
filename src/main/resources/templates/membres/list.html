@@ -71,6 +71,12 @@
                         </td>
                         <td>
                             <div class="d-flex gap-1">
+                                <a th:href="@{/membres/{id}/historique(id=${membre.id})}"
+                                   class="btn btn-sm btn-icon"
+                                   style="border:1px solid #e2e8f0;background:#fff;color:#64748b"
+                                   title="Historique des emprunts">
+                                    <i class="bi bi-clock-history"></i>
+                                </a>
                                 <a th:href="@{/membres/{id}/modifier(id=${membre.id})}"
                                    class="btn btn-sm btn-icon"
                                    style="border:1px solid #e2e8f0;background:#fff;color:#4f46e5"

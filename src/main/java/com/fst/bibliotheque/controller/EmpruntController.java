@@ -21,8 +21,11 @@ import com.fst.bibliotheque.service.EmpruntService;
 import com.fst.bibliotheque.service.LivreService;
 import com.fst.bibliotheque.service.MembreService;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import java.io.IOException;
 
 @Controller
 @RequestMapping("/emprunts")
@@ -81,6 +84,16 @@ public class EmpruntController {
         empruntService.enregistrerRetour(id);
         redirectAttributes.addFlashAttribute("successMessage", "Retour enregistré avec succès.");
         return "redirect:/emprunts";
+    }
+
+    @GetMapping("/export/csv")
+    public void exportCsv(@RequestParam(required = false) StatutEmprunt statut,
+                          HttpServletResponse response) throws IOException {
+        response.setContentType("text/csv;charset=UTF-8");
+        String filename = statut != null ? "emprunts_" + statut.name().toLowerCase() + ".csv" : "emprunts.csv";
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
+        response.getWriter().write('\uFEFF'); // UTF-8 BOM for Excel
+        empruntService.exportCsv(statut, response.getWriter());
     }
 }
 

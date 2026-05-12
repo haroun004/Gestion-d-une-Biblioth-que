@@ -1,8 +1,10 @@
 package com.fst.bibliotheque.service;
 
+import java.io.PrintWriter;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -20,16 +22,27 @@ import com.fst.bibliotheque.repository.EmpruntRepository;
 import com.fst.bibliotheque.repository.LivreRepository;
 import com.fst.bibliotheque.repository.MembreRepository;
 
-import lombok.RequiredArgsConstructor;
-
 @Service
-@RequiredArgsConstructor
 @Transactional
 public class EmpruntService {
 
     private final EmpruntRepository empruntRepository;
     private final LivreRepository livreRepository;
     private final MembreRepository membreRepository;
+    private final EmailService emailService;
+    private final ReservationService reservationService;
+
+    public EmpruntService(EmpruntRepository empruntRepository,
+                          LivreRepository livreRepository,
+                          MembreRepository membreRepository,
+                          EmailService emailService,
+                          @Lazy ReservationService reservationService) {
+        this.empruntRepository = empruntRepository;
+        this.livreRepository = livreRepository;
+        this.membreRepository = membreRepository;
+        this.emailService = emailService;
+        this.reservationService = reservationService;
+    }
 
     public Page<EmpruntViewDTO> findAll(StatutEmprunt statut, Pageable pageable) {
         Page<Emprunt> page = (statut == null)
@@ -72,15 +85,55 @@ public class EmpruntService {
         Livre livre = emprunt.getLivre();
         livre.setQuantiteDisponible(livre.getQuantiteDisponible() + 1);
         livreRepository.save(livre);
-        return DtoMapper.toViewDTO(empruntRepository.save(emprunt));
+        EmpruntViewDTO result = DtoMapper.toViewDTO(empruntRepository.save(emprunt));
+        reservationService.notifierDisponibilite(livre);
+        return result;
     }
 
     @Scheduled(cron = "0 0 1 * * *")
     public void mettreAJourRetards() {
         List<Emprunt> enRetard = empruntRepository
                 .findByStatutAndDateRetourPrevueBefore(StatutEmprunt.EN_COURS, LocalDate.now());
-        enRetard.forEach(e -> e.setStatut(StatutEmprunt.EN_RETARD));
+        enRetard.forEach(e -> {
+            e.setStatut(StatutEmprunt.EN_RETARD);
+            emailService.envoyerRappelRetard(
+                    e.getMembre().getEmail(),
+                    e.getMembre().getPrenom() + " " + e.getMembre().getNom(),
+                    e.getLivre().getTitre(),
+                    e.getDateRetourPrevue());
+        });
         empruntRepository.saveAll(enRetard);
+    }
+
+    @Transactional(readOnly = true)
+    public List<EmpruntViewDTO> findHistoriqueByMembre(Long membreId) {
+        return empruntRepository.findByMembreIdOrderByDateEmpruntDesc(membreId)
+                .stream().map(DtoMapper::toViewDTO).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public void exportCsv(StatutEmprunt statut, PrintWriter writer) {
+        List<Emprunt> emprunts = (statut == null)
+                ? empruntRepository.findAll()
+                : empruntRepository.findByStatut(statut);
+        writer.println("ID,Titre,Auteur,Membre,Email,\"Date Emprunt\",\"Date Retour Prévue\",\"Date Retour Effectif\",Statut");
+        for (Emprunt e : emprunts) {
+            writer.printf("%d,\"%s\",\"%s\",\"%s\",\"%s\",%s,%s,%s,%s%n",
+                    e.getId(),
+                    csvEscape(e.getLivre().getTitre()),
+                    csvEscape(e.getLivre().getAuteur()),
+                    csvEscape(e.getMembre().getPrenom() + " " + e.getMembre().getNom()),
+                    e.getMembre().getEmail(),
+                    e.getDateEmprunt(),
+                    e.getDateRetourPrevue(),
+                    e.getDateRetourEffective() != null ? e.getDateRetourEffective() : "",
+                    e.getStatut().name());
+        }
+        writer.flush();
+    }
+
+    private static String csvEscape(String s) {
+        return s == null ? "" : s.replace("\"", "\"\"");
     }
 
     public long countEnCours() {
